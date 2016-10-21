@@ -20,7 +20,10 @@ const createGroups = (members) => {
 
 		rtm.sendMessage('Howdy! Why don\'t you two pick a time to meet this week?', info.group.id);
 		rtm.sendMessage('As a reminder, I\'ll pair you with someone in the #engineering_buddies channel every Monday morning.', info.group.id);
-
+		
+		setTimeout(() => {
+			rtm.sendMessage('That\'s about it for now. Thanks for testing!', info.group.id);
+		}, 10000);
 	});
 };
 
@@ -34,7 +37,6 @@ const shuffleMembers = (members) => {
 
 const pairUsers = (members, botId) => {
 	let result = [];
-	//members = members.splice(members.indexOf(botId), 1);
 	members = members.filter(mem => mem !== botId);
 	members = shuffleMembers(members);
 	console.log(members);
@@ -58,6 +60,7 @@ const kickOffSessions = (channel) => {
 	web.channels.info(channel, (err, info) => {
 		if (err) throw err;
 
+		console.log('HERE');
 		const pairedGroups = pairUsers(info.channel.members, rtm.activeUserId);
 		for(let i in pairedGroups) {
 			createGroups(pairedGroups[i]);
@@ -67,14 +70,15 @@ const kickOffSessions = (channel) => {
 
 const job = new CronJob({
 	cronTime: '00 30 10 * * 1',
-	onTick: kickOffSessions(CHANNEL),
+	onTick: () => { kickOffSessions(CHANNEL); },
+	start: false,
 	timeZone: 'America/New_York'
 });
 
 /* Slack RTM Events */
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, () => {
 	console.log('Connection opened');
-	//kickOffSessions(CHANNEL);
+	kickOffSessions(CHANNEL);
 });
 
 rtm.on(CLIENT_EVENTS.RTM.DISCONNECT, () => {
@@ -93,9 +97,6 @@ rtm.on(RTM_EVENTS.MESSAGE, (data) => {
 	switch (command) {
 		case 'help':
 			rtm.sendMessage(usage, data.channel);
-			break;
-		case 'test':
-			kickOffSessions(CHANNEL);
 			break;
 	}
 
