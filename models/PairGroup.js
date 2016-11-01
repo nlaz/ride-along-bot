@@ -8,6 +8,10 @@ export default class PairGroup {
 	}
 
 	getMembers() {
-		return members;
+		return this._members;
+	}
+
+	getMembersString() {
+		return this._members.join(',');
 	}
 }
