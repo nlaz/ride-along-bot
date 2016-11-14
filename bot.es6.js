@@ -34,7 +34,7 @@ const shuffleMembers = (members) => {
 };
 
 const pairUsers = (members, botId) => {
-	let result = [];
+	let groups = [];
 	members = members.filter(mem => mem !== botId);
 	members = shuffleMembers(members);
 
@@ -42,18 +42,36 @@ const pairUsers = (members, botId) => {
 		//Make a group of 3 if odd number of members
 		let mod = members.length % 2;
 		const group = new PairGroup(members.splice(0, 2 + mod));
-		result.push(group);
+		groups.push(group);
 	}
-	return result;
+	groups.map(openChat);
 };
 
 /* Helper Methods */
+const getValidUsers = (allUsers, callback, activeId) => {
+	let validUsers = [];
+	let count = 0;
+	for (let i = 0; i < allUsers.length; i++) {
+		const userId = allUsers[i];
+		web.users.info(userId, (err, info) => {
+			if (err) throw err;
+			count = count + 1;
+
+			if (!info.user.deleted && !info.user.is_bot) {
+				validUsers.push(userId);
+			}
+			if (count === allUsers.length) {
+				callback(validUsers, activeId);
+			}
+		});
+	}
+}
+
 const kickOffSessions = (channel) => {
 	web.channels.info(channel, (err, info) => {
 		if (err) throw err;
 
-		const pairedGroups = pairUsers(info.channel.members, rtm.activeUserId);
-		pairedGroups.map(openChat);
+		getValidUsers(info.channel.members, pairUsers, rtm.activeUserId);
 	});
 };
 
