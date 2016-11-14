@@ -18,7 +18,7 @@ const openChat = (pairedGroup) => {
 	web.mpim.open(pairedGroup.getMembersString(), (err, info) => {
 		if (err) throw err;
 
-		rtm.sendMessage('Howdy! Why don\'t you two pick a time to meet this week?', info.group.id);
+		rtm.sendMessage('Howdy! Why don\'t you two pick a time to pair this week?', info.group.id);
 		rtm.sendMessage('As a reminder, I\'ll pair you with someone in the #engineering_buddies channel every Monday morning.', info.group.id);
 	});
 };
